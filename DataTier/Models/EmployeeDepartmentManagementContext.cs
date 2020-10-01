@@ -18,7 +18,7 @@ namespace DataTier.Models
         public virtual DbSet<Department> Department { get; set; }
         public virtual DbSet<Role> Role { get; set; }
         public virtual DbSet<Staff> Staff { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<User> User { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -143,7 +143,7 @@ namespace DataTier.Models
                     .HasConstraintName("FK_Staff_User");
             });
 
-            modelBuilder.Entity<Users>(entity =>
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(e => e.UserNo)
                     .HasName("UQ__Users__1788955EDE4BB9FD")
@@ -208,7 +208,7 @@ namespace DataTier.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Role)
-                    .WithMany(p => p.Users)
+                    .WithMany(p => p.User)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_User_Role");

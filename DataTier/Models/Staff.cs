@@ -14,6 +14,6 @@ namespace DataTier.Models
         public DateTime UpdDatetime { get; set; }
 
         public virtual Department Department { get; set; }
-        public virtual Users StaffNavigation { get; set; }
+        public virtual User StaffNavigation { get; set; }
     }
 }

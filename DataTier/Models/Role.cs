@@ -7,7 +7,7 @@ namespace DataTier.Models
     {
         public Role()
         {
-            Users = new HashSet<Users>();
+            User = new HashSet<User>();
         }
 
         public string RoleId { get; set; }
@@ -18,6 +18,6 @@ namespace DataTier.Models
         public string UpdBy { get; set; }
         public DateTime UpdDatetime { get; set; }
 
-        public virtual ICollection<Users> Users { get; set; }
+        public virtual ICollection<User> User { get; set; }
     }
 }

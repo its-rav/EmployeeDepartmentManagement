@@ -1,61 +1,71 @@
-create database EmployeeDepartmentManagement
-use EmployeeDepartmentManagement
+create database EDM
+use EDM
 
 --drop database EmployeeDepartmentManagement
 
-create table Role (
-	RoleId varchar(10) primary key,
-	RoleNm varchar(50) not null,
-	DelFlg bit not null default 0,
-	InsBy varchar(50) not null,
-	InsDatetime datetime not null default getdate(),
-	UpdBy varchar(50) not null,
-	UpdDatetime datetime not null default getdate()
-)
-
-create table User (
+create table UserRole (
 	Id int identity(1,1) primary key,
+	RoleName varchar(50) not null,
+	IsDeleted bit not null default 0,
+	CreatedBy varchar(50) not null,
+	CreatedAt datetime not null default getdate(),
+	UpdatedBy varchar(50) not null,
+	UpdateBy datetime not null default getdate()
+)
+INSERT INTO UserRole(RoleName,CreatedBy,UpdatedBy) VALUES
+('Adminstrator','NhanVT','NhanVT'),
+('Department Staff','NhanVT','NhanVT')
+
+create table Account (
+	Id uniqueidentifier primary key,
 	Username varchar(100) unique not null,
-	PasswordHash varbinary(max) not null,
-	PasswordSalt varbinary(max) not null,
+	PasswordHash varbinary(max) null,
 	Email varchar(450) not null,
-	UserNo varchar(11) not null unique,
 	FullName nvarchar(100) not null,
-	Phonenumber varchar(11),
+	PhoneNumber varchar(11),
 	Address nvarchar(450),
 	Photo varchar(max),
-	RoleId varchar(10) not null,
-	DelFlg bit not null default 0,
-	InsBy varchar(50) not null,
-	InsDatetime datetime not null default getdate(),
-	UpdBy varchar(50) not null,
-	UpdDatetime datetime not null default getdate()
+	RoleId int not null,
+	FOREIGN KEY(RoleId) REFERENCES UserRole(Id),
+	IsDeleted bit not null default 0,
+	CreatedBy varchar(50) not null,
+	CreatedAt datetime not null default getdate(),
+	UpdatedBy varchar(50) not null,
+	UpdateBy datetime not null default getdate()
 )
+
+INSERT INTO Account(Id,Username,Email,FullName,PhoneNumber,Address,RoleId,CreatedBy,UpdatedBy) VALUES
+('9b6980df-bad6-460a-aaea-64591b3ae7ae','nhanvt','NhanVTSE130478@fpt.edu.vn','Vo Thanh Nhan','0906690322','Cay Tram',1,'NhanVT','NhanVT'),
+('5eb93535-b957-461a-a589-3b9e1c0c6bbe','nhanvt2','voasd123@gmail.com','Vo Thanh Nhan2','0906690322','Nguyen Van Khoi',2,'NhanVT','NhanVT')
+
 create table Department(
-	DepartmentId varchar(10) primary key,
-	DepartmentNm nvarchar(50) not null,
+	Id varchar(10) primary key,
+	DepartmentName nvarchar(50) not null,
 	Hotline varchar(11),
-	RoomNum varchar(6) not null unique,
-	DelFlg bit not null default 0,
-	InsBy varchar(50) not null,
-	InsDatetime datetime not null default getdate(),
-	UpdBy varchar(50) not null,
-	UpdDatetime datetime not null default getdate()
+	RoomNumber varchar(6) not null unique,
+	IsDeleted bit not null default 0,
+	CreatedBy varchar(50) not null,
+	CreatedAt datetime not null default getdate(),
+	UpdatedBy varchar(50) not null,
+	UpdateBy datetime not null default getdate()
 )
+INSERT INTO Department(Id,DepartmentName,Hotline,RoomNumber,CreatedBy,UpdatedBy) VALUES
+('AD','Accounting','0906690322','102','NhanVT','NhanVT'),
+('BD','Biologistic','0906690322','103','NhanVT','NhanVT')
 
-create table Staff(
-	StaffId int primary key,
+create table DepartmentStaff(
+	AccountId uniqueidentifier not null,
 	DepartmentId varchar(10) not null,
-	DelFlg bit not null default 0,
-	InsBy varchar(50) not null,
-	InsDatetime datetime not null default getdate(),
-	UpdBy varchar(50) not null,
-	UpdDatetime datetime not null default getdate()
+	PRIMARY KEY(AccountId,DepartmentId),
+	FOREIGN KEY(AccountId) REFERENCES Account(Id),
+	FOREIGN KEY(DepartmentId) REFERENCES Department(Id),
+	IsDeleted bit not null default 0,
+	CreatedBy varchar(50) not null,
+	CreatedAt datetime not null default getdate(),
+	UpdatedBy varchar(50) not null,
+	UpdateBy datetime not null default getdate(),
 )
-alter table Staff
-add constraint FK_Staff_User foreign key (StaffId) references User(Id)
-alter table Staff
-add constraint FK_Staff_Department foreign key (DepartmentId) references Department(departmentId)
-
-alter table Users
-add constraint FK_User_Role foreign key (RoleId) references Role(RoleId)
+INSERT INTO DepartmentStaff(AccountId,DepartmentId,CreatedBy,UpdatedBy) VALUES
+('9b6980df-bad6-460a-aaea-64591b3ae7ae','AD','NhanVT','NhanVT'),
+('9b6980df-bad6-460a-aaea-64591b3ae7ae','BD','NhanVT','NhanVT'),
+('5eb93535-b957-461a-a589-3b9e1c0c6bbe','BD','NhanVT','NhanVT')

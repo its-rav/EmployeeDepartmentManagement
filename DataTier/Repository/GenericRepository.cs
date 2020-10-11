@@ -11,10 +11,10 @@ namespace DataTier.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        protected EmployeeDepartmentManagementContext _context;
+        protected EDMContext _context;
         protected DbSet<T> table = null;
 
-        public GenericRepository(EmployeeDepartmentManagementContext context)
+        public GenericRepository(EDMContext context)
         {
             this._context = context;
             table = _context.Set<T>();

@@ -1,12 +1,9 @@
-using Autofac;
-using DataTier.Models;
-using DataTier.UnitOfWork;
+using EmployeeDepartmentManagement.App_Start;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 namespace EmployeeDepartmentManagement
 {
     public class Startup
@@ -21,23 +18,22 @@ namespace EmployeeDepartmentManagement
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            DependencyInjectionResolver.ConfigureServices(services);
+            JsonFormatConfig.ConfigureServices(services);
+            SwaggerConfig.ConfigureServices(services);
+            DbConfig.ConfigureServices(services, Configuration);
             //sql connection
-            services.AddDbContext<EmployeeDepartmentManagementContext>(options =>options.UseSqlServer(Configuration.GetConnectionString("db")));
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers();
-        }
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            builder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
+
+            CorsConfig.ConfigureServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+
+            ErrorHandlerConfig.Configure(app, env);
 
             app.UseHttpsRedirection();
 
@@ -45,10 +41,14 @@ namespace EmployeeDepartmentManagement
 
             app.UseAuthorization();
 
+            CorsConfig.Configure(app, env);
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            SwaggerConfig.Configure(app, env, provider);
         }
     }
 }

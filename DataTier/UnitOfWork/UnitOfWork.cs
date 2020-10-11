@@ -10,8 +10,8 @@ namespace DataTier.UnitOfWork
     public class UnitOfWork : IUnitOfWork
     {
 
-        private readonly EmployeeDepartmentManagementContext _context;
-        public UnitOfWork(EmployeeDepartmentManagementContext context)
+        private readonly EDMContext _context;
+        public UnitOfWork(EDMContext context)
         {
             _context = context;
         }

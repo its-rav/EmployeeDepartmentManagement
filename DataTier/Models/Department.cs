@@ -7,19 +7,19 @@ namespace DataTier.Models
     {
         public Department()
         {
-            Staff = new HashSet<Staff>();
+            DepartmentStaff = new HashSet<DepartmentStaff>();
         }
 
-        public string DepartmentId { get; set; }
-        public string DepartmentNm { get; set; }
+        public string Id { get; set; }
+        public string DepartmentName { get; set; }
         public string Hotline { get; set; }
-        public string RoomNum { get; set; }
-        public bool DelFlg { get; set; }
-        public string InsBy { get; set; }
-        public DateTime InsDatetime { get; set; }
-        public string UpdBy { get; set; }
-        public DateTime UpdDatetime { get; set; }
+        public string RoomNumber { get; set; }
+        public bool IsDeleted { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string UpdatedBy { get; set; }
+        public DateTime UpdateBy { get; set; }
 
-        public virtual ICollection<Staff> Staff { get; set; }
+        public virtual ICollection<DepartmentStaff> DepartmentStaff { get; set; }
     }
 }

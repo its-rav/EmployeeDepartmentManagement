@@ -20,7 +20,11 @@ namespace EmployeeDepartmentManagement.Controllers
         {
             _context = context;
         }
-
+        [HttpGet("staff/{id}")]
+        public async Task<ActionResult<IEnumerable<DepartmentStaff>>> GetDepartmentsOfStaff(Guid id)
+        {
+            return await _context.DepartmentStaff.Where(x => x.AccountId == id).ToListAsync();
+        }
         // GET: api/Departments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Department>>> GetDepartment()

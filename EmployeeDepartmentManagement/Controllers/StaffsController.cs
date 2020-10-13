@@ -6,31 +6,60 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DataTier.Models;
+using BusinessTier.Services;
+using BusinessTier.ViewModels;
+using BusinessTier.Responses;
 
 namespace EmployeeDepartmentManagement.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class StaffsController : ControllerBase
     {
         private readonly EDMContext _context;
 
-        public StaffsController(EDMContext context)
+        private readonly IStaffService _staffService;
+
+        public StaffsController(IStaffService staffService, EDMContext context)
         {
+            _staffService = staffService;
             _context = context;
         }
 
+
+        //[ApiExplorerSettings(IgnoreApi = true)]
         // GET: api/Staffs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DepartmentStaff>>> GetDepartmentStaff()
+        [ProducesResponseType(typeof(BaseResponse<List<StaffViewModel>>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<List<StaffViewModel>>>> GetStaffs()
         {
-            return await _context.DepartmentStaff.ToListAsync();
+            var staffs = _staffService.GetStaffs();
+
+            if (staffs == null)
+            {
+                return NotFound();
+            }
+
+
+            var result = new BaseResponse<List<StaffViewModel>>()
+            {
+                Data = staffs
+            };
+
+            return Ok(result);
         }
+
         [HttpGet("department/{id}")]
         public async Task<ActionResult<IEnumerable<DepartmentStaff>>> GetStaffsOfDepartment(string id)
         {
             return await _context.DepartmentStaff.Where(x=>x.DepartmentId==id).ToListAsync();
         }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         // GET: api/Staffs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartmentStaff>> GetDepartmentStaff(Guid id)
@@ -45,6 +74,7 @@ namespace EmployeeDepartmentManagement.Controllers
             return departmentStaff;
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         // PUT: api/Staffs/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -81,6 +111,7 @@ namespace EmployeeDepartmentManagement.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<DepartmentStaff>> PostDepartmentStaff(DepartmentStaff departmentStaff)
         {
             _context.DepartmentStaff.Add(departmentStaff);
@@ -105,6 +136,8 @@ namespace EmployeeDepartmentManagement.Controllers
 
         // DELETE: api/Staffs/5
         [HttpDelete("{id}")]
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<DepartmentStaff>> DeleteDepartmentStaff(Guid id)
         {
             var departmentStaff = await _context.DepartmentStaff.FindAsync(id);

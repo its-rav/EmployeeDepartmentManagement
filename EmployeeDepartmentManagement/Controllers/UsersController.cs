@@ -8,6 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using DataTier.Models;
 using BusinessTier.Requests;
 using BusinessTier.Services;
+using BusinessTier.ViewModels;
+using BusinessTier.Requests.UserRequest;
+using BusinessTier.Responses;
+using BusinessTier.Utilities;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper.Internal;
 
 namespace EmployeeDepartmentManagement.Controllers
 {
@@ -26,7 +32,11 @@ namespace EmployeeDepartmentManagement.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        [ProducesResponseType(typeof(BaseResponse<List<UserViewModel>>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<List<UserViewModel>>>> GetAccounts()
         {
             var accounts = _userService.GetUsers();
 
@@ -34,10 +44,14 @@ namespace EmployeeDepartmentManagement.Controllers
             {
                 return NotFound();
             }
-
-            return Ok(accounts);
+            var result = new BaseResponse<List<UserViewModel>>
+            {
+                Data = accounts
+            };
+            return Ok(result);
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         // GET: api/users/5
         [HttpGet("{username}")]
         public async Task<ActionResult<Account>> GetAccount(string username)
@@ -52,14 +66,26 @@ namespace EmployeeDepartmentManagement.Controllers
             return Ok(account);
         }
         [HttpPost("authenticate")]
-        public async Task<ActionResult<Account>> AuthenticateAccount([FromBody] AuthenticateRequest req)
+        [ProducesResponseType(typeof(BaseResponse<dynamic>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 403)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<dynamic>>> AuthenticateAccount([FromBody] AuthenticateRequest req)
         {
-            var result=_userService.Authenticate(req.Username, req.GetPasswordHash());
+            var (token,user)=_userService.Authenticate(req.Username, req.Password);
 
-            if (result == null)
+            if (token==null)
             {
                 return NotFound();
             }
+
+            var result = new BaseResponse<dynamic>
+            {
+                Data = new {
+                    Token=token,
+                    User=user 
+                }
+            };
 
             return Ok(result);
         }
@@ -67,6 +93,7 @@ namespace EmployeeDepartmentManagement.Controllers
         // PUT: api/users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(Guid id, Account account)
         {
@@ -92,23 +119,32 @@ namespace EmployeeDepartmentManagement.Controllers
         // POST: api/users
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [Authorize(Roles = Constants.ROLE_ADMIN_NAME)]
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(Account account)
+        [ProducesResponseType(typeof(BaseResponse<UserViewModel>), 201)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<UserViewModel>>> PostAccount([FromBody]CreateAccountRequest request)
         {
             try
             {
-                var result = _userService.CreateUser(account);
-                return Created(result.Id.ToString(), result);
+                var raw = Request.Headers.FirstOrDefault(x=>x.Key.Equals("Authorization")).Value;
+                var requester = IdentityManager.GetUsernameFromToken(raw);
+
+
+                var result = _userService.CreateUser(request, requester);
+                return Created(result.Id.ToString(),new BaseResponse<UserViewModel>() { Data = result});
             }
             catch(Exception ex)
             {
-                if (ex.Message.Contains("dup"))
-                    return BadRequest("Existed user");
+                if (ex.Message.StartsWith("ERR"))
+                    return BadRequest(new ErrorResponse(ex.Message));
                 else
-                    return StatusCode(500);
+                    throw;
             }
         }
 
+        [ApiExplorerSettings(IgnoreApi = true)]
         // DELETE: api/users/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Account>> DeleteAccount(Guid id)

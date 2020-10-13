@@ -10,7 +10,7 @@ create table UserRole (
 	CreatedBy varchar(50) not null,
 	CreatedAt datetime not null default getdate(),
 	UpdatedBy varchar(50) not null,
-	UpdateBy datetime not null default getdate()
+	UpdatedAt datetime not null default getdate()
 )
 INSERT INTO UserRole(RoleName,CreatedBy,UpdatedBy) VALUES
 ('Adminstrator','NhanVT','NhanVT'),
@@ -31,7 +31,7 @@ create table Account (
 	CreatedBy varchar(50) not null,
 	CreatedAt datetime not null default getdate(),
 	UpdatedBy varchar(50) not null,
-	UpdateBy datetime not null default getdate()
+	UpdatedAt datetime not null default getdate()
 )
 
 INSERT INTO Account(Id,Username,Email,FullName,PhoneNumber,Address,RoleId,CreatedBy,UpdatedBy) VALUES
@@ -47,7 +47,7 @@ create table Department(
 	CreatedBy varchar(50) not null,
 	CreatedAt datetime not null default getdate(),
 	UpdatedBy varchar(50) not null,
-	UpdateBy datetime not null default getdate()
+	UpdatedAt datetime not null default getdate()
 )
 INSERT INTO Department(Id,DepartmentName,Hotline,RoomNumber,CreatedBy,UpdatedBy) VALUES
 ('AD','Accounting','0906690322','102','NhanVT','NhanVT'),
@@ -63,7 +63,7 @@ create table DepartmentStaff(
 	CreatedBy varchar(50) not null,
 	CreatedAt datetime not null default getdate(),
 	UpdatedBy varchar(50) not null,
-	UpdateBy datetime not null default getdate(),
+	UpdatedAt datetime not null default getdate()
 )
 INSERT INTO DepartmentStaff(AccountId,DepartmentId,CreatedBy,UpdatedBy) VALUES
 ('9b6980df-bad6-460a-aaea-64591b3ae7ae','AD','NhanVT','NhanVT'),

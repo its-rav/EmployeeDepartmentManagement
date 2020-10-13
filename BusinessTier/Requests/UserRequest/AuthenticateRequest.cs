@@ -8,7 +8,5 @@ namespace BusinessTier.Requests
     {
         public string Username { get; set; }
         public string Password { get; set; }
-
-        public byte[] GetPasswordHash() => Encoding.ASCII.GetBytes(Password);
     }
 }

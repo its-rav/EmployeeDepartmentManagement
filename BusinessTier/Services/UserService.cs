@@ -1,66 +1,119 @@
-﻿using DataTier.Models;
+﻿using AutoMapper;
+using BusinessTier.Requests.UserRequest;
+using BusinessTier.Utilities;
+using BusinessTier.ViewModels;
+using DataTier.Models;
 using DataTier.UnitOfWork;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web.Razor.Text;
+using System.Web.WebPages;
 
 namespace BusinessTier.Services
 {
     public interface IUserService
     {
-        Account Authenticate(string username, byte[] password);
+        (string, UserViewModel) Authenticate(string username, string password);
         Account FindUserById(string username);
-        List<Account> GetUsers();
-        Account CreateUser(Account user);
+        List<UserViewModel> GetUsers();
+        UserViewModel CreateUser(CreateAccountRequest request, string createdBy);
 
         Account UpdateUser(Account user);
     }
-    public class UserService: IUserService
+    public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper.ConfigurationProvider.CreateMapper();
         }
-        public Account Authenticate(string username, byte[] password)
+        public (string, UserViewModel) Authenticate(string username, string password)
         {
-            return _unitOfWork.Repository<Account>().FindFirstByProperty(x=>x.Username.Equals(username)&&x.PasswordHash.SequenceEqual(password)&&x.IsDeleted!=null);
+            var user = _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) &&IdentityManager.VerifyHashedPassword(x.PasswordHash, password) && !x.IsDeleted);
+            if (user == null) return (null, null);
+            return (IdentityManager.GenerateJwtToken(user.FullName, new string[] { user.Role.RoleName }, user.Id, user.Username)
+                , _mapper.Map<UserViewModel>(user));
 
         }
         public Account FindUserById(string username)
         {
-            return _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) && x.IsDeleted != null);
+            return _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) && !x.IsDeleted);
         }
-        public List<Account> GetUsers()
+        public List<UserViewModel> GetUsers()
         {
-            return _unitOfWork.Repository<Account>().FindAllByProperty(x => x.IsDeleted != null).ToList();
+            var users = _unitOfWork.Repository<Account>()
+                .FindAllByProperty(x => x.IsDeleted != null)
+                .Include(x => x.Role)
+                //.Include(x=>x.DepartmentStaff).ThenInclude(x=>x.Department)
+                .ToList();
+            var result = _mapper.Map<List<UserViewModel>>(users);
+
+
+            return result;
         }
-        public Account CreateUser(Account user)
+        public UserViewModel CreateUser(CreateAccountRequest request, string createdBy)
         {
+            if (request.Password.IsEmpty() || request.PasswordConfirmation.IsEmpty())
+                throw new Exception(Constants.ERR_EMPTY_PWD);
+            if (request.Email.IsEmpty())
+                throw new Exception(Constants.ERR_EMPTY_EMAIL);
+            if (request.FullName.IsEmpty())
+                throw new Exception(Constants.ERR_EMPTY_FNAME);
+            if (!request.Password.Equals(request.PasswordConfirmation))
+                throw new Exception(Constants.ERR_PWD_NOTMATCH);
+
+
             var repo = _unitOfWork.Repository<Account>();
 
-            var duplicatedUser = repo.FindFirstByProperty(x => x.Username.Equals(user.Username) && x.IsDeleted != null);
+            var creatingUser = _mapper.Map<Account>(request);
 
-            if(duplicatedUser!= null)
-            {
-                repo.Insert(user);
-                repo.Commit();
-            }
-            else
-            {
-                throw new Exception( "Duplicated username");
-            }
-            return user;
+                try
+                {
+                    creatingUser.Id = Guid.NewGuid();
+                    creatingUser.CreatedBy = createdBy;
+                    creatingUser.UpdatedBy = createdBy;
+                    creatingUser.PasswordHash = IdentityManager.HashPassword(request.Password);
+                    repo.Insert(creatingUser);
+                    repo.Commit();
+                }
+                catch(DbUpdateException due)
+                {
+                    var se = due.GetBaseException() as SqlException;
+                    if (se != null)
+                    {
+                        if (se.Errors.Count > 0)
+                        {
+                            switch (se.Errors[0].Number)
+                            {
+                                case 547: // Foreign Key violation
+                                    throw new Exception(Constants.ERR_ROLE_FK);
+                                case 2627:
+                                    throw new Exception(Constants.ERR_UNAME_NOTAVAILABLE);
+                                default:
+                                    throw;
+                            }
+                        }
+                    }
+                }
+            
+
+
+            return _mapper.Map<UserViewModel>(creatingUser);
         }
         public Account UpdateUser(Account user)
         {
             var repo = _unitOfWork.Repository<Account>();
 
-            var duplicatedUser = repo.FindFirstByProperty(x => x.Username.Equals(user.Username) && x.IsDeleted != null);
+            var duplicatedUser = repo.FindFirstByProperty(x => x.Username.Equals(user.Username) && !x.IsDeleted);
 
             if (duplicatedUser != null)
             {

@@ -8,7 +8,7 @@ namespace BusinessTier.Responses
     {
         public ErrorDetailResponse Error { get; private set; }
 
-        public ErrorResponse(int errorCode, string message)
+        public ErrorResponse(string errorCode, string message)
         {
             Error = new ErrorDetailResponse
             {
@@ -16,11 +16,19 @@ namespace BusinessTier.Responses
                 Message = message
             };
         }
+        public ErrorResponse(string errorCode )
+        {
+            Error = new ErrorDetailResponse
+            {
+                Code = errorCode
+            };
+        }
+
     }
 
     public class ErrorDetailResponse
     {
-        public int Code { get; set; }
+        public string Code { get; set; }
         public string Message { get; set; }
     }
 }

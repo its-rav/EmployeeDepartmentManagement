@@ -12,7 +12,7 @@ namespace BusinessTier.Handlers
         {
             if (context.Exception is ParseException)
             {
-                context.Result = new ObjectResult(new ErrorResponse((int)HttpStatusCode.BadRequest, context.Exception.ToString()))
+                context.Result = new ObjectResult(new ErrorResponse(HttpStatusCode.BadRequest.ToString(), context.Exception.ToString()))
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest,
                 };
@@ -20,7 +20,7 @@ namespace BusinessTier.Handlers
                 return;
             }
 #if DEBUG
-            context.Result = new ObjectResult(new ErrorResponse((int)HttpStatusCode.InternalServerError, context.Exception.ToString()))
+            context.Result = new ObjectResult(new ErrorResponse(HttpStatusCode.InternalServerError.ToString(), context.Exception.ToString()))
             {
                 StatusCode = (int)HttpStatusCode.InternalServerError,
             };

@@ -14,6 +14,7 @@ namespace EmployeeDepartmentManagement.App_Start
             services.AddScoped<DbContext, EDMContext>();
 
             services.AddScoped<IUserService,UserService>();
+            services.AddScoped<IStaffService, StaffService>();
         }
     }
 }

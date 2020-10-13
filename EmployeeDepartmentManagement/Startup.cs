@@ -18,12 +18,23 @@ namespace EmployeeDepartmentManagement
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            FilterConfig.ConfigureServices(services);
+
             DependencyInjectionResolver.ConfigureServices(services);
+
             JsonFormatConfig.ConfigureServices(services);
+
             SwaggerConfig.ConfigureServices(services);
+
+            AutoMapperConfig.ConfigureServices(services);
+
+            AuthConfig.ConfigureServices(services);
+
             DbConfig.ConfigureServices(services, Configuration);
+
             //sql connection
             services.AddRouting(options => options.LowercaseUrls = true);
+
             services.AddControllers();
 
             CorsConfig.ConfigureServices(services);
@@ -39,7 +50,7 @@ namespace EmployeeDepartmentManagement
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            AuthConfig.Configure(app, env);
 
             CorsConfig.Configure(app, env);
 

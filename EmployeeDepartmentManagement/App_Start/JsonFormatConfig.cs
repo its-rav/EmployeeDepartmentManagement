@@ -17,7 +17,8 @@ namespace EmployeeDepartmentManagement.App_Start
                 // Use the default property (Pascal) casing
 
 
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() };
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() };
+
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Populate;
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;

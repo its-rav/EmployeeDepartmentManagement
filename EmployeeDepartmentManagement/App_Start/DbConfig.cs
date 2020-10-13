@@ -2,10 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EmployeeDepartmentManagement.App_Start
 {
@@ -13,7 +9,9 @@ namespace EmployeeDepartmentManagement.App_Start
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<EDMContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
+            services.AddDbContext<EDMContext>(options =>
+            options.UseLazyLoadingProxies()
+            .UseSqlServer(configuration.GetConnectionString("db")));
         }
     }
 }

@@ -23,7 +23,7 @@ namespace DataTier.Models
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string UpdatedBy { get; set; }
-        public DateTime UpdateBy { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
         public virtual UserRole Role { get; set; }
         public virtual ICollection<DepartmentStaff> DepartmentStaff { get; set; }

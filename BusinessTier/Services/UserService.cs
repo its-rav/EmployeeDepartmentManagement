@@ -46,7 +46,7 @@ namespace BusinessTier.Services
         public List<UserViewModel> GetUsers()
         {
             var users = _unitOfWork.Repository<Account>()
-                .FindAllByProperty(x => x.IsDeleted != null)
+                .FindAllByProperty(x => !x.IsDeleted)
                 .Include(x => x.Role)
                 //.Include(x=>x.DepartmentStaff).ThenInclude(x=>x.Department)
                 .ToList();

@@ -1,19 +1,17 @@
-﻿using System;
+﻿using BusinessTier.Requests;
+using BusinessTier.Requests.UserRequest;
+using BusinessTier.Responses;
+using BusinessTier.Services;
+using BusinessTier.Utilities;
+using BusinessTier.ViewModels;
+using DataTier.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DataTier.Models;
-using BusinessTier.Requests;
-using BusinessTier.Services;
-using BusinessTier.ViewModels;
-using BusinessTier.Requests.UserRequest;
-using BusinessTier.Responses;
-using BusinessTier.Utilities;
-using Microsoft.AspNetCore.Authorization;
-using AutoMapper.Internal;
 
 namespace EmployeeDepartmentManagement.Controllers
 {
@@ -72,18 +70,19 @@ namespace EmployeeDepartmentManagement.Controllers
         [ProducesResponseType(typeof(ErrorResponse), 500)]
         public async Task<ActionResult<BaseResponse<dynamic>>> AuthenticateAccount([FromBody] AuthenticateRequest req)
         {
-            var (token,user)=_userService.Authenticate(req.Username, req.Password);
+            var (token, user) = _userService.Authenticate(req.Username, req.Password);
 
-            if (token==null)
+            if (token == null)
             {
                 return NotFound();
             }
 
             var result = new BaseResponse<dynamic>
             {
-                Data = new {
-                    Token=token,
-                    User=user 
+                Data = new
+                {
+                    Token = token,
+                    User = user
                 }
             };
 
@@ -124,18 +123,18 @@ namespace EmployeeDepartmentManagement.Controllers
         [ProducesResponseType(typeof(BaseResponse<UserViewModel>), 201)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<ActionResult<BaseResponse<UserViewModel>>> PostAccount([FromBody]CreateAccountRequest request)
+        public async Task<ActionResult<BaseResponse<UserViewModel>>> PostAccount([FromBody] CreateAccountRequest request)
         {
             try
             {
-                var raw = Request.Headers.FirstOrDefault(x=>x.Key.Equals("Authorization")).Value;
+                var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
                 var requester = IdentityManager.GetUsernameFromToken(raw);
 
 
                 var result = _userService.CreateUser(request, requester);
-                return Created(result.Id.ToString(),new BaseResponse<UserViewModel>() { Data = result});
+                return Created(result.Id.ToString(), new BaseResponse<UserViewModel>() { Data = result });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (ex.Message.StartsWith("ERR"))
                     return BadRequest(new ErrorResponse(ex.Message));

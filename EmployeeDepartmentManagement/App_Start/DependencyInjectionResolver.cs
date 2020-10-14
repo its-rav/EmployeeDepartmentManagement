@@ -13,7 +13,7 @@ namespace EmployeeDepartmentManagement.App_Start
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<DbContext, EDMContext>();
 
-            services.AddScoped<IUserService,UserService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStaffService, StaffService>();
         }
     }

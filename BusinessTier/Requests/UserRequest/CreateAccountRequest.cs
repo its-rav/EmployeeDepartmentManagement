@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusinessTier.Requests.UserRequest
+﻿namespace BusinessTier.Requests.UserRequest
 {
     public class CreateAccountRequest
     {

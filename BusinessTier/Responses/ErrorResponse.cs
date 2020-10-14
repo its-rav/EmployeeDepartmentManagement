@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusinessTier.Responses
+﻿namespace BusinessTier.Responses
 {
     public class ErrorResponse
     {
@@ -16,7 +12,7 @@ namespace BusinessTier.Responses
                 Message = message
             };
         }
-        public ErrorResponse(string errorCode )
+        public ErrorResponse(string errorCode)
         {
             Error = new ErrorDetailResponse
             {

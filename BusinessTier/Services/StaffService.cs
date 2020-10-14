@@ -4,10 +4,8 @@ using BusinessTier.ViewModels;
 using DataTier.Models;
 using DataTier.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace BusinessTier.Services
 {
@@ -15,7 +13,7 @@ namespace BusinessTier.Services
     {
         List<StaffViewModel> GetStaffs();
     }
-    public class StaffService:IStaffService
+    public class StaffService : IStaffService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -27,9 +25,9 @@ namespace BusinessTier.Services
         public List<StaffViewModel> GetStaffs()
         {
             var staffs = _unitOfWork.Repository<Account>()
-                .FindAllByProperty(x =>x.Role.Id==Constants.ROLE_STAFF_ID && !x.IsDeleted)
+                .FindAllByProperty(x => x.Role.Id == Constants.ROLE_STAFF_ID && !x.IsDeleted)
                 .Include(x => x.Role)
-                .Include(x=>x.DepartmentStaff).ThenInclude(x=>x.Department)
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
                 .ToList();
             var result = _mapper.Map<List<StaffViewModel>>(staffs);
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusinessTier.Requests
+﻿namespace BusinessTier.Requests
 {
     public class AuthenticateRequest
     {

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BusinessTier.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,17 +16,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using BusinessTier.Utilities;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeDepartmentManagement.App_Start
 {
     public class SwaggerConfig
     {
-        
+
         public static void ConfigureServices(IServiceCollection services)
         {
 
@@ -81,7 +80,7 @@ namespace EmployeeDepartmentManagement.App_Start
             services.AddSwaggerGenNewtonsoftSupport();
             services.TryAddEnumerable(ServiceDescriptor.Transient<IApiDescriptionProvider, SnakeCaseQueryParametersApiDescriptionProvider>());
         }
-       
+
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             app.UseSwagger();
@@ -100,19 +99,19 @@ namespace EmployeeDepartmentManagement.App_Start
 
     }
     public class AuthorizeCheckOperationFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            public void Apply(OpenApiOperation operation, OperationFilterContext context)
-            {
-                bool hasAuth = (context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
-                    || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any())
-                    && !context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
-            
-                if (hasAuth)
-                {
-                    operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
-                    operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+            bool hasAuth = (context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any()
+                || context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any())
+                && !context.MethodInfo.GetCustomAttributes(true).OfType<AllowAnonymousAttribute>().Any();
 
-                    operation.Security = new List<OpenApiSecurityRequirement>
+            if (hasAuth)
+            {
+                operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
+                operation.Responses.Add("403", new OpenApiResponse { Description = "Forbidden" });
+
+                operation.Security = new List<OpenApiSecurityRequirement>
                 {
                     new OpenApiSecurityRequirement
                     {
@@ -131,93 +130,93 @@ namespace EmployeeDepartmentManagement.App_Start
                         ] = new string[]{ }
                     }
                 };
-                }
             }
         }
-        public class CustomNamingStrategy : NamingStrategy
+    }
+    public class CustomNamingStrategy : NamingStrategy
+    {
+        protected override string ResolvePropertyName(string name)
         {
-            protected override string ResolvePropertyName(string name)
-            {
-                string result = Regex.Replace(name, "[A-Z]", x => "-" + x.Value).Trim().ToLower();
-                return result.StartsWith("-") ? result.Substring(1, result.Length - 1) : result;
-            }
+            string result = Regex.Replace(name, "[A-Z]", x => "-" + x.Value).Trim().ToLower();
+            return result.StartsWith("-") ? result.Substring(1, result.Length - 1) : result;
         }
-        public class SnakeCaseQueryValueProvider : QueryStringValueProvider
+    }
+    public class SnakeCaseQueryValueProvider : QueryStringValueProvider
+    {
+        public SnakeCaseQueryValueProvider(
+            BindingSource bindingSource,
+            IQueryCollection values,
+            CultureInfo culture)
+            : base(bindingSource, values, culture)
         {
-            public SnakeCaseQueryValueProvider(
-                BindingSource bindingSource,
-                IQueryCollection values,
-                CultureInfo culture)
-                : base(bindingSource, values, culture)
-            {
-            }
-
-            public override bool ContainsPrefix(string prefix)
-            {
-                return base.ContainsPrefix(prefix.ToSnakeCase());
-            }
-
-            public override ValueProviderResult GetValue(string key)
-            {
-                return base.GetValue(key.ToSnakeCase());
-            }
         }
-        public class SnakeCaseQueryValueProviderFactory : IValueProviderFactory
+
+        public override bool ContainsPrefix(string prefix)
         {
-            public Task CreateValueProviderAsync(ValueProviderFactoryContext context)
-            {
-                if (context == null)
-                {
-                    throw new ArgumentNullException(nameof(context));
-                }
-
-                var valueProvider = new SnakeCaseQueryValueProvider(
-                    BindingSource.Query,
-                    context.ActionContext.HttpContext.Request.Query,
-                    CultureInfo.CurrentCulture);
-
-                context.ValueProviders.Add(valueProvider);
-
-                return Task.CompletedTask;
-            }
+            return base.ContainsPrefix(prefix.ToSnakeCase());
         }
-        public class SnakeCaseQueryParametersApiDescriptionProvider : IApiDescriptionProvider
+
+        public override ValueProviderResult GetValue(string key)
         {
-            public int Order => 1;
-
-            public void OnProvidersExecuted(ApiDescriptionProviderContext context)
+            return base.GetValue(key.ToSnakeCase());
+        }
+    }
+    public class SnakeCaseQueryValueProviderFactory : IValueProviderFactory
+    {
+        public Task CreateValueProviderAsync(ValueProviderFactoryContext context)
+        {
+            if (context == null)
             {
+                throw new ArgumentNullException(nameof(context));
             }
 
-            public void OnProvidersExecuting(ApiDescriptionProviderContext context)
+            var valueProvider = new SnakeCaseQueryValueProvider(
+                BindingSource.Query,
+                context.ActionContext.HttpContext.Request.Query,
+                CultureInfo.CurrentCulture);
+
+            context.ValueProviders.Add(valueProvider);
+
+            return Task.CompletedTask;
+        }
+    }
+    public class SnakeCaseQueryParametersApiDescriptionProvider : IApiDescriptionProvider
+    {
+        public int Order => 1;
+
+        public void OnProvidersExecuted(ApiDescriptionProviderContext context)
+        {
+        }
+
+        public void OnProvidersExecuting(ApiDescriptionProviderContext context)
+        {
+            foreach (var parameter in context.Results.SelectMany(x => x.ParameterDescriptions).Where(x => x.Source.Id == "Query" || x.Source.Id == "ModelBinding"))
             {
-                foreach (var parameter in context.Results.SelectMany(x => x.ParameterDescriptions).Where(x => x.Source.Id == "Query" || x.Source.Id == "ModelBinding"))
-                {
-                    parameter.Name = parameter.Name.ToSnakeCase();
-                }
+                parameter.Name = parameter.Name.ToSnakeCase();
             }
         }
-        //remove version required from route
-        //public class RemoveVersionParameterFilter : IOperationFilter
-        //{
-        //    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        //    {
-        //        var versionParameter = operation.Parameters.SingleOrDefault(p => p.Name == "version");
-        //        if (versionParameter == null) return;
-        //        operation.Parameters.Remove(versionParameter);
-        //    }
-        //}
-        ////auto map version from doc
-        //public class ReplaceVersionWithExactValueInPathFilter : IDocumentFilter
-        //{
-        //    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
-        //    {
-        //        var paths = new OpenApiPaths();
-        //        foreach (var path in swaggerDoc.Paths)
-        //        {
-        //            paths.Add(path.Key.Replace("v{version}", swaggerDoc.Info.Version), path.Value);
-        //        }
-        //        swaggerDoc.Paths = paths;
-        //    }
-        //}
+    }
+    //remove version required from route
+    //public class RemoveVersionParameterFilter : IOperationFilter
+    //{
+    //    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    //    {
+    //        var versionParameter = operation.Parameters.SingleOrDefault(p => p.Name == "version");
+    //        if (versionParameter == null) return;
+    //        operation.Parameters.Remove(versionParameter);
+    //    }
+    //}
+    ////auto map version from doc
+    //public class ReplaceVersionWithExactValueInPathFilter : IDocumentFilter
+    //{
+    //    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    //    {
+    //        var paths = new OpenApiPaths();
+    //        foreach (var path in swaggerDoc.Paths)
+    //        {
+    //            paths.Add(path.Key.Replace("v{version}", swaggerDoc.Info.Version), path.Value);
+    //        }
+    //        swaggerDoc.Paths = paths;
+    //    }
+    //}
 }

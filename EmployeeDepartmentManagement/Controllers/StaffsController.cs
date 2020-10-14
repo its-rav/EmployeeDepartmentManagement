@@ -1,14 +1,13 @@
-﻿using System;
+﻿using BusinessTier.Responses;
+using BusinessTier.Services;
+using BusinessTier.ViewModels;
+using DataTier.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DataTier.Models;
-using BusinessTier.Services;
-using BusinessTier.ViewModels;
-using BusinessTier.Responses;
 
 namespace EmployeeDepartmentManagement.Controllers
 {
@@ -56,7 +55,7 @@ namespace EmployeeDepartmentManagement.Controllers
         [HttpGet("department/{id}")]
         public async Task<ActionResult<IEnumerable<DepartmentStaff>>> GetStaffsOfDepartment(string id)
         {
-            return await _context.DepartmentStaff.Where(x=>x.DepartmentId==id).ToListAsync();
+            return await _context.DepartmentStaff.Where(x => x.DepartmentId == id).ToListAsync();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BusinessTier.Responses
+﻿namespace BusinessTier.Responses
 {
     public class BaseResponse<T> where T : class
     {

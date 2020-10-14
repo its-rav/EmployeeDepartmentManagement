@@ -4,16 +4,11 @@ using BusinessTier.Utilities;
 using BusinessTier.ViewModels;
 using DataTier.Models;
 using DataTier.UnitOfWork;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Web.Razor.Text;
 using System.Web.WebPages;
 
 namespace BusinessTier.Services
@@ -38,7 +33,7 @@ namespace BusinessTier.Services
         }
         public (string, UserViewModel) Authenticate(string username, string password)
         {
-            var user = _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) &&IdentityManager.VerifyHashedPassword(x.PasswordHash, password) && !x.IsDeleted);
+            var user = _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) && IdentityManager.VerifyHashedPassword(x.PasswordHash, password) && !x.IsDeleted);
             if (user == null) return (null, null);
             return (IdentityManager.GenerateJwtToken(user.FullName, new string[] { user.Role.RoleName }, user.Id, user.Username)
                 , _mapper.Map<UserViewModel>(user));
@@ -76,35 +71,35 @@ namespace BusinessTier.Services
 
             var creatingUser = _mapper.Map<Account>(request);
 
-                try
+            try
+            {
+                creatingUser.Id = Guid.NewGuid();
+                creatingUser.CreatedBy = createdBy;
+                creatingUser.UpdatedBy = createdBy;
+                creatingUser.PasswordHash = IdentityManager.HashPassword(request.Password);
+                repo.Insert(creatingUser);
+                repo.Commit();
+            }
+            catch (DbUpdateException due)
+            {
+                var se = due.GetBaseException() as SqlException;
+                if (se != null)
                 {
-                    creatingUser.Id = Guid.NewGuid();
-                    creatingUser.CreatedBy = createdBy;
-                    creatingUser.UpdatedBy = createdBy;
-                    creatingUser.PasswordHash = IdentityManager.HashPassword(request.Password);
-                    repo.Insert(creatingUser);
-                    repo.Commit();
-                }
-                catch(DbUpdateException due)
-                {
-                    var se = due.GetBaseException() as SqlException;
-                    if (se != null)
+                    if (se.Errors.Count > 0)
                     {
-                        if (se.Errors.Count > 0)
+                        switch (se.Errors[0].Number)
                         {
-                            switch (se.Errors[0].Number)
-                            {
-                                case 547: // Foreign Key violation
-                                    throw new Exception(Constants.ERR_ROLE_FK);
-                                case 2627:
-                                    throw new Exception(Constants.ERR_UNAME_NOTAVAILABLE);
-                                default:
-                                    throw;
-                            }
+                            case 547: // Foreign Key violation
+                                throw new Exception(Constants.ERR_ROLE_FK);
+                            case 2627:
+                                throw new Exception(Constants.ERR_UNAME_NOTAVAILABLE);
+                            default:
+                                throw;
                         }
                     }
                 }
-            
+            }
+
 
 
             return _mapper.Map<UserViewModel>(creatingUser);

@@ -15,19 +15,21 @@ namespace EmployeeDepartmentManagement.App_Start
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.CreateMap<CreateAccountRequest, Account>();
-                mc.CreateMap<Account,UserViewModel>()
-                .ForMember(dest=>dest.RoleName,opt=>opt.MapFrom(src=>src.Role.RoleName))
+                mc.CreateMap<Account, UserViewModel>()
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
                 .ForMember(dest => dest.LastUpdatedBy, opt => opt.MapFrom(src => src.UpdatedBy))
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
-                .ForMember(dest => dest.Departments, opt => opt.MapFrom((src,dest,member,ctx) => {
-                    var departments=src.DepartmentStaff.Select(x => x.Department).ToList();
+                .ForMember(dest => dest.Departments, opt => opt.MapFrom((src, dest, member, ctx) =>
+                {
+                    var departments = src.DepartmentStaff.Select(x => x.Department).ToList();
                     return ctx.Mapper.Map<List<DepartmentViewModel>>(departments);
                 }));
                 mc.CreateMap<Account, StaffViewModel>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
                 .ForMember(dest => dest.LastUpdatedBy, opt => opt.MapFrom(src => src.UpdatedBy))
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
-                .ForMember(dest => dest.Departments, opt => opt.MapFrom((src, dest, member, ctx) => {
+                .ForMember(dest => dest.Departments, opt => opt.MapFrom((src, dest, member, ctx) =>
+                {
                     var departments = src.DepartmentStaff.Select(x => x.Department).ToList();
                     return ctx.Mapper.Map<List<DepartmentViewModel>>(departments);
                 }));

@@ -45,7 +45,7 @@ namespace BusinessTier.Services
                 .FindAllByProperty(x =>true)
                 .Include(x => x.Role)
                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList();
+                .ToList().IgnoreSecondAccounts();
             }
             //if mod request => get only staffs
             else if (roles.Contains(Constants.ROLE_MOD_NAME))
@@ -54,7 +54,7 @@ namespace BusinessTier.Services
                 .FindAllByProperty(x => x.Role.Id.Equals(Constants.ROLE_STAFF_ID))
                 .Include(x => x.Role)
                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList();
+                .ToList().IgnoreSecondAccounts();
             }
 
             return _mapper.Map<List<StaffViewModel>>(staffs);
@@ -72,7 +72,7 @@ namespace BusinessTier.Services
                  .Get(x => x.DepartmentStaff.Select(x => x.DepartmentId).Contains(departmentId))
                  .Include(x => x.Role)
                  .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                 .ToList();
+                 .ToList().IgnoreSecondAccounts();
             }
             //if mod request => get only staffs
             else if (roles.Contains(Constants.ROLE_MOD_NAME))
@@ -82,7 +82,7 @@ namespace BusinessTier.Services
                                     && x.Role.Id.Equals(Constants.ROLE_STAFF_ID) ) 
                 .Include(x => x.Role)
                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList();
+                .ToList().IgnoreSecondAccounts();
             }
 
             return _mapper.Map<List<StaffViewModel>>(staffs);
@@ -99,7 +99,7 @@ namespace BusinessTier.Services
                 .Get(x => x.Id.Equals(staffId))
                 .Include(x => x.Role)
                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .FirstOrDefault();
+                .FirstOrDefault().IgnoreSecondAccounts();
             }
             //if mod request => get only staffs
             else if (roles.Contains(Constants.ROLE_MOD_NAME))
@@ -108,7 +108,7 @@ namespace BusinessTier.Services
                 .Get(x => x.Id.Equals(staffId) && x.Role.Id.Equals(Constants.ROLE_STAFF_ID))
                 .Include(x => x.Role)
                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .FirstOrDefault();
+                .FirstOrDefault().IgnoreSecondAccounts();
             }
 
             return _mapper.Map<StaffViewModel>(staff);
@@ -272,6 +272,25 @@ namespace BusinessTier.Services
             
 
             return null;
+        }
+    }
+
+    static class StaffServiceExtensions
+    {
+        public static List<Account> IgnoreSecondAccounts(this List<Account> source)
+        {
+            if (source == null) return null;
+            foreach (var account in source)
+                foreach (var ds in account.DepartmentStaff)
+                    ds.Department.DepartmentStaff = new HashSet<DepartmentStaff>();
+            return source;
+        }
+        public static Account IgnoreSecondAccounts(this Account source)
+        {
+            if (source == null) return null;
+            foreach (var ds in source.DepartmentStaff)
+                ds.Department.DepartmentStaff = new HashSet<DepartmentStaff>();
+            return source;
         }
     }
 }

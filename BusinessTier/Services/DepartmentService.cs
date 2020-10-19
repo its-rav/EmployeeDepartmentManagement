@@ -268,6 +268,7 @@ namespace BusinessTier.Services
     {
         public static List<Department> IgnoreSecondDepartments(this List<Department> source)
         {
+            if (source == null) return null;
             foreach (var department in source)
                 foreach (var ds in department.DepartmentStaff)
                     ds.Account.DepartmentStaff = new HashSet<DepartmentStaff>();
@@ -301,6 +302,7 @@ namespace BusinessTier.Services
         }
         public static Department FilterForModRole(this Department source)
         {
+            if (source == null) return null;
             List<DepartmentStaff> newDsList = new List<DepartmentStaff>();
             foreach (var ds in source.DepartmentStaff)
             {

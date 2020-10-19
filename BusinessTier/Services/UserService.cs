@@ -57,7 +57,9 @@ namespace BusinessTier.Services
         {
             var user = _unitOfWork.Repository<Account>()
                 .Get(x => x.Id.Equals(userId) && !x.IsDeleted)
-                .Include(x=>x.Role).FirstOrDefault();
+                .Include(x=>x.Role)
+                .Include(x=>x.DepartmentStaff).ThenInclude(x=>x.Department)
+                .FirstOrDefault().IgnoreSecondAccounts();
 
             if (user == null) return null;
 

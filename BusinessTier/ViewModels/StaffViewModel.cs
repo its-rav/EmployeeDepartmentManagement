@@ -18,6 +18,7 @@ namespace BusinessTier.ViewModels
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Photo { get; set; }
+        public bool IsDeleted { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string LastUpdatedBy { get; set; }

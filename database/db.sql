@@ -4,7 +4,7 @@ use EDM
 --drop database EmployeeDepartmentManagement
 
 create table UserRole (
-	Id int identity(1,1) primary key,
+	Id int primary key,
 	RoleName varchar(50) not null,
 	IsDeleted bit not null default 0,
 	CreatedBy varchar(50) not null,
@@ -12,9 +12,10 @@ create table UserRole (
 	UpdatedBy varchar(50) not null,
 	UpdatedAt datetime not null default getdate()
 )
-INSERT INTO UserRole(RoleName,CreatedBy,UpdatedBy) VALUES
-('Adminstrator','NhanVT','NhanVT'),
-('Department Staff','NhanVT','NhanVT')
+INSERT INTO UserRole(Id,RoleName,CreatedBy,UpdatedBy) VALUES
+(1,'Adminstrator','NhanVT','NhanVT'),
+(2,'Department Staff','NhanVT','NhanVT'),
+(3,'Moderator','NhanVT','NhanVT')
 
 create table Account (
 	Id uniqueidentifier primary key,

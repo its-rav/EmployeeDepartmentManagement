@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace DataTier.Repository
 {
@@ -24,9 +25,9 @@ namespace DataTier.Repository
             return _context.SaveChanges();
         }
 
-        public IQueryable<T> FindAllByProperty(Func<T, bool> expression)
+        public IQueryable<T> FindAllByProperty(Expression<Func<T, bool>> predicate)
         {
-            return table.Where(expression).AsQueryable();
+            return table.Where(predicate);
         }
 
         public T FindFirstByProperty(Func<T, bool> expression)
@@ -34,9 +35,13 @@ namespace DataTier.Repository
             return table.FirstOrDefault(expression);
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> Get()
         {
-            return table.Select(x => x);
+            return table;
+        }
+        public IQueryable<T> Get(Expression<Func<T, bool>> predicate)
+        {
+            return table.Where(predicate);
         }
         public EntityEntry<T> Insert(T obj)
         {

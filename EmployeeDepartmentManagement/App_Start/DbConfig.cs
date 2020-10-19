@@ -10,8 +10,7 @@ namespace EmployeeDepartmentManagement.App_Start
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<EDMContext>(options =>
-            options.UseLazyLoadingProxies()
-            .UseSqlServer(configuration.GetConnectionString("db")));
+            options .UseSqlServer(configuration.GetConnectionString("db")));
         }
     }
 }

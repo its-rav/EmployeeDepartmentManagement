@@ -16,7 +16,6 @@ namespace EmployeeDepartmentManagement.App_Start
                 //});
                 // Use the default property (Pascal) casing
 
-
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() };
 
                 options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;

@@ -1,6 +1,11 @@
-﻿using DataTier.Models;
+﻿using BusinessTier.Requests.DepartmentRequest;
+using BusinessTier.Responses;
+using BusinessTier.Services;
+using BusinessTier.Utilities;
+using BusinessTier.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,121 +13,189 @@ using System.Threading.Tasks;
 
 namespace EmployeeDepartmentManagement.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class DepartmentsController : ControllerBase
     {
-        private readonly EDMContext _context;
 
-        public DepartmentsController(EDMContext context)
+        private readonly IDepartmentService _departmentService;
+
+        public DepartmentsController(IDepartmentService departmentService)
         {
-            _context = context;
+            _departmentService = departmentService;
         }
-        [HttpGet("staff/{id}")]
-        public async Task<ActionResult<IEnumerable<DepartmentStaff>>> GetDepartmentsOfStaff(Guid id)
-        {
-            return await _context.DepartmentStaff.Where(x => x.AccountId == id).ToListAsync();
-        }
+
         // GET: api/Departments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Department>>> GetDepartment()
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<List<DepartmentViewModel>>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartments()
         {
-            return await _context.Department.ToListAsync();
+            var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+            var roles = IdentityManager.GetRolesFromToken(raw);
+
+            var departments = _departmentService.GetDepartments(roles);
+
+            if (departments == null)
+            {
+                return NotFound();
+            }
+
+            var result = new BaseResponse<List<DepartmentViewModel>>()
+            {
+                Data = departments
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("staff/{staffId}")]
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<List<DepartmentViewModel>>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartmentStaff(Guid staffId)
+        {
+            var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+            var roles = IdentityManager.GetRolesFromToken(raw);
+
+            var departments = _departmentService.GetDepartmentsOfStaff(staffId, roles);
+
+            if (departments == null)
+            {
+                return NotFound();
+            }
+
+            var result = new BaseResponse<List<DepartmentViewModel>>()
+            {
+                Data = departments
+            };
+
+            return Ok(result);
         }
 
         // GET: api/Departments/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Department>> GetDepartment(string id)
+        [HttpGet("{departmentId}")]
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<DepartmentViewModel>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<DepartmentViewModel>>> GetDepartment(string departmentId)
         {
-            var department = await _context.Department.FindAsync(id);
+            var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+            var roles = IdentityManager.GetRolesFromToken(raw);
+
+            var department = _departmentService.GetDepartmentById(departmentId, roles);
 
             if (department == null)
             {
                 return NotFound();
             }
 
-            return department;
+            var result = new BaseResponse<DepartmentViewModel>()
+            {
+                Data = department
+            };
+
+            return Ok(result);
         }
 
         // PUT: api/Departments/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepartment(string id, Department department)
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<DepartmentViewModel>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<DepartmentViewModel>>> PutDepartment([FromRoute] string id, [FromBody] UpdateDepartmentRequest request)
         {
-            if (id != department.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(department).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DepartmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+                var requester = IdentityManager.GetUsernameFromToken(raw);
+                var roles = IdentityManager.GetRolesFromToken(raw);
 
-            return NoContent();
+                var department = _departmentService.UpdateDepartment(id, request, requester, roles);
+
+                if (department == null)
+                    return NotFound();
+
+                return Ok(new BaseResponse<DepartmentViewModel>() { Data = department });
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.StartsWith("ERR"))
+                    return BadRequest(new ErrorResponse(ex.Message));
+                else
+                    throw;
+            }
         }
 
         // POST: api/Departments
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Department>> PostDepartment(Department department)
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<DepartmentViewModel>), 201)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<DepartmentViewModel>>> PostAccount([FromBody] CreateDepartmentRequest request)
         {
-            _context.Department.Add(department);
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (DepartmentExists(department.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+                var requester = IdentityManager.GetUsernameFromToken(raw);
+                var roles = IdentityManager.GetRolesFromToken(raw);
 
-            return CreatedAtAction("GetDepartment", new { id = department.Id }, department);
+                var result = _departmentService.CreateDepartment(request, requester, roles);
+
+                if (result == null)
+                {
+                    return BadRequest(new ErrorResponse(StatusCodes.Status400BadRequest.ToString()
+                        , "Failed to create a department"));
+                }
+
+                return Created(result.Id.ToString(), new BaseResponse<DepartmentViewModel>() { Data = result });
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.StartsWith("ERR"))
+                    return BadRequest(new ErrorResponse(ex.Message));
+                else
+                    throw;
+            }
         }
 
         // DELETE: api/Departments/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Department>> DeleteDepartment(string id)
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(BaseResponse<string>), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult<BaseResponse<string>>> DeleteDepartmentStaff(string id)
         {
-            var department = await _context.Department.FindAsync(id);
-            if (department == null)
+            var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+            var requester = IdentityManager.GetUsernameFromToken(raw);
+            var roles = IdentityManager.GetRolesFromToken(raw);
+
+            var departmentId = _departmentService.DeleteDepartment(id, requester, roles);
+
+            if (departmentId == null)
             {
                 return NotFound();
             }
 
-            _context.Department.Remove(department);
-            await _context.SaveChangesAsync();
+            var result = new BaseResponse<string>()
+            {
+                Data = departmentId,
+                Message = "Removed department successfully"
+            };
 
-            return department;
-        }
-
-        private bool DepartmentExists(string id)
-        {
-            return _context.Department.Any(e => e.Id == id);
+            return result;
         }
     }
 }

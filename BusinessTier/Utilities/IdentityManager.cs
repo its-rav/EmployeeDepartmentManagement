@@ -11,12 +11,24 @@ namespace BusinessTier.Utilities
 {
     public static class IdentityManager
     {
+        public static string GetUserIdFromToken(string raw)
+        {
+            var bearerRemoved = raw.Replace("Bearer ", string.Empty);
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(bearerRemoved);
+            return token.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+        }
+        public static IEnumerable<string> GetRolesFromToken(string raw)
+        {
+            var bearerRemoved = raw.Replace("Bearer ", string.Empty);
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(bearerRemoved);
+            return token.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x=>x.Value);
+        }
+
         public static string GetUsernameFromToken(string raw)
         {
             var bearerRemoved = raw.Replace("Bearer ", string.Empty);
             var token = new JwtSecurityTokenHandler().ReadJwtToken(bearerRemoved);
             return token.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
-
         }
         public static string GenerateJwtToken(string fullName, string[] roles, Guid userId, string username)
         {

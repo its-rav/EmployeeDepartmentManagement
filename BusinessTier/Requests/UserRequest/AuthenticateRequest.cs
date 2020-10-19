@@ -1,4 +1,4 @@
-﻿namespace BusinessTier.Requests
+﻿namespace BusinessTier.Requests.UserRequest
 {
     public class AuthenticateRequest
     {

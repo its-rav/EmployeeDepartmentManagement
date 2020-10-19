@@ -15,6 +15,7 @@ namespace EmployeeDepartmentManagement.App_Start
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<IDepartmentService, DepartmentService>();
         }
     }
 }

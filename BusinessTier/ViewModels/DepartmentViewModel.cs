@@ -7,7 +7,7 @@ namespace BusinessTier.ViewModels
     {
         public DepartmentViewModel()
         {
-            Staffs = new HashSet<UserViewModel>();
+            Staffs = new HashSet<StaffViewModel>();
         }
 
         public string Id { get; set; }
@@ -16,9 +16,9 @@ namespace BusinessTier.ViewModels
         public string RoomNumber { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string UpdatedBy { get; set; }
-        public DateTime UpdateBy { get; set; }
+        public string LastUpdatedBy { get; set; }
+        public DateTime LastUpdatedAt { get; set; }
 
-        public virtual ICollection<UserViewModel> Staffs { get; set; }
+        public virtual ICollection<StaffViewModel> Staffs { get; set; }
     }
 }

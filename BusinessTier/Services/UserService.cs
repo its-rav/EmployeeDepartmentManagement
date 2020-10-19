@@ -16,7 +16,7 @@ namespace BusinessTier.Services
     public interface IUserService
     {
         (string, UserViewModel) Authenticate(string username, string password);
-        Account FindUserById(string username);
+        UserViewModel FindUserById(Guid userId);
         List<UserViewModel> GetUsers();
         UserViewModel CreateUser(CreateAccountRequest request, string createdBy);
 
@@ -33,20 +33,40 @@ namespace BusinessTier.Services
         }
         public (string, UserViewModel) Authenticate(string username, string password)
         {
-            var user = _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) && IdentityManager.VerifyHashedPassword(x.PasswordHash, password) && !x.IsDeleted);
+            /*//Add password
+            var repo = _unitOfWork.Repository<Account>();
+            var user = repo
+                .FindFirstByProperty(x => x.Username.Equals(username));
+            user.PasswordHash = IdentityManager.HashPassword(password);
+            repo.Update(user);
+            repo.Commit();*/
+
+            var user = _unitOfWork.Repository<Account>().Get(x => x.Username.Equals(username)
+            && !x.IsDeleted).Include(x=>x.Role).FirstOrDefault();
+
             if (user == null) return (null, null);
-            return (IdentityManager.GenerateJwtToken(user.FullName, new string[] { user.Role.RoleName }, user.Id, user.Username)
-                , _mapper.Map<UserViewModel>(user));
+
+            if (!IdentityManager.VerifyHashedPassword(user.PasswordHash, password)) return (null, null);
+
+            var token = IdentityManager.GenerateJwtToken(user.FullName, new string[] { user.Role.RoleName }, user.Id, user.Username);
+
+            return (token , _mapper.Map<UserViewModel>(user));
 
         }
-        public Account FindUserById(string username)
+        public UserViewModel FindUserById(Guid userId)
         {
-            return _unitOfWork.Repository<Account>().FindFirstByProperty(x => x.Username.Equals(username) && !x.IsDeleted);
+            var user = _unitOfWork.Repository<Account>()
+                .Get(x => x.Id.Equals(userId) && !x.IsDeleted)
+                .Include(x=>x.Role).FirstOrDefault();
+
+            if (user == null) return null;
+
+            return _mapper.Map<UserViewModel>(user);
         }
         public List<UserViewModel> GetUsers()
         {
             var users = _unitOfWork.Repository<Account>()
-                .FindAllByProperty(x => !x.IsDeleted)
+                .Get(x => !x.IsDeleted)
                 .Include(x => x.Role)
                 //.Include(x=>x.DepartmentStaff).ThenInclude(x=>x.Department)
                 .ToList();

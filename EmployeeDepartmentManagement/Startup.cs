@@ -50,9 +50,9 @@ namespace EmployeeDepartmentManagement
 
             app.UseRouting();
 
-            AuthConfig.Configure(app, env);
-
             CorsConfig.Configure(app, env);
+
+            AuthConfig.Configure(app, env);
 
             app.UseEndpoints(endpoints =>
             {

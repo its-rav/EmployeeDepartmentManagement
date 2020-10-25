@@ -37,6 +37,14 @@
             <param name="id">Department ID</param>
             <returns></returns>
         </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.AddStaffToDeparment(System.String,System.Guid)">
+            <summary>
+            Add a department for a staff
+            </summary>
+            <param name="departmentId">Department ID</param>
+            <param name="staffId">Staff ID</param>
+            <returns></returns>
+        </member>
         <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.PostAccount(BusinessTier.Requests.DepartmentRequest.CreateDepartmentRequest)">
             <summary>
             Create a department
@@ -81,6 +89,14 @@
             Update staff by ID
             </summary>
             <param name="id">Staff ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.AddDepartmentToStaff(System.String,System.Guid)">
+            <summary>
+            Add a staff to a department
+            </summary>
+            <param name="staffId">Staff ID</param>
+            <param name="departmentId">Department ID</param>
             <returns></returns>
         </member>
         <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.PostAccount(BusinessTier.Requests.StaffRequest.CreateStaffRequest)">

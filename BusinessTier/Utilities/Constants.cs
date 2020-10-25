@@ -37,6 +37,11 @@
 
         public const int DEFAULT_PAGE_SIZE = 99999;
         public const int MAX_PAGE_SIZE = 99999; 
-        public const string ERR_MAX_PAGE_SIZE = "ERR_MAX_PAGE_SIZE";
+        public const string ERR_MAX_PAGE_SIZE = "ERR_MAX_PAGE_SIZE"; 
+
+        public const string ERR_FK = "ERR_FK"; 
+        public const string ERR_STAFF_NOTFOUND = "ERR_STAFF_NOTFOUND";
+        public const string ERR_DEPARTMENT_NOTFOUND = "ERR_DEPARTMENT_NOTFOUND"; 
+        public const string ERR_MOD_PERM = "ERR_MOD_PERM";
     }
 }

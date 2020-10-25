@@ -24,6 +24,7 @@ namespace BusinessTier.Services
         StaffViewModel CreateStaff(CreateStaffRequest request, string createdBy, IEnumerable<string> roles);
         StaffViewModel UpdateStaff(Guid id, UpdateStaffRequest request, string updatedBy, IEnumerable<string> roles);
         string DeleteStaff(Guid id, string updater, IEnumerable<string> roles);
+        void AddStaffToDepartment(Guid staffId, string departmentId, string requester, IEnumerable<string> roles);
     }
     public class StaffService : IStaffService
     {
@@ -346,7 +347,53 @@ namespace BusinessTier.Services
 
             return null;
         }
+        public void AddStaffToDepartment( Guid staffId,string departmentId, string requester, IEnumerable<string> roles = null)
+        {
 
+            if (roles.Count() == 0 || roles == null) return;
+
+            var dsRepo = _unitOfWork.Repository<DepartmentStaff>();
+            var aRepo = _unitOfWork.Repository<Account>();
+            try
+            {
+                Account staff = aRepo.Get(x => x.Id.Equals(staffId)).Include(x => x.Role).FirstOrDefault();
+
+                if (staff == null)
+                    throw new Exception(Constants.ERR_STAFF_NOTFOUND);
+
+                if (roles.Contains(Constants.ROLE_MOD_NAME)
+                    && staff.Role.RoleName.Equals(Constants.ROLE_MOD_NAME)
+                    || staff.Role.RoleName.Equals(Constants.ROLE_ADMIN_NAME))
+                    throw new Exception(Constants.ERR_MOD_PERM);
+
+
+                dsRepo.Insert(new DepartmentStaff()
+                {
+                    AccountId = staffId,
+                    DepartmentId = departmentId,
+                    CreatedBy = requester,
+                    UpdatedBy = requester
+                });
+                dsRepo.Commit();
+            }
+            catch (DbUpdateException due)
+            {
+                var se = due.GetBaseException() as SqlException;
+                if (se != null)
+                {
+                    if (se.Errors.Count > 0)
+                    {
+                        switch (se.Errors[0].Number)
+                        {
+                            case 547: // Foreign Key violation
+                                throw new Exception(Constants.ERR_FK);
+                            default:
+                                throw;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     static class StaffServiceExtensions

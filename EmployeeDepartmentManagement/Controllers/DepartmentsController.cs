@@ -185,6 +185,40 @@ namespace EmployeeDepartmentManagement.Controllers
         }
         #endregion
 
+        #region PUT departments/{departmentId}/staff/{staffId}
+        // PUT: api/Departments/{departmentId}/staff/{staffId}
+        /// <summary>
+        /// Add a department for a staff
+        /// </summary>
+        /// <param name="departmentId">Department ID</param>
+        /// <param name="staffId">Staff ID</param>
+        /// <returns></returns>
+        [HttpPut("{departmentId}/staff/{staffId}")]
+        [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [ProducesResponseType(typeof(ErrorResponse), 500)]
+        public async Task<ActionResult> AddStaffToDeparment([FromRoute]string departmentId,Guid staffId)
+        {
+            var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
+            var requester = IdentityManager.GetUserIdFromToken(raw);
+            var roles = IdentityManager.GetRolesFromToken(raw);
+
+            try
+            {
+                _departmentService.AddStaffToDepartment(departmentId, staffId, requester, roles);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.StartsWith("ERR"))
+                    return BadRequest(new ErrorResponse(ex.Message));
+                else
+                    throw;
+            }
+        }
+        #endregion
+
         #region POST departments
         /// <summary>
         /// Create a department

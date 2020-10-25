@@ -14,6 +14,7 @@ namespace BusinessTier.ViewModels
         public string DepartmentName { get; set; }
         public string Hotline { get; set; }
         public string RoomNumber { get; set; }
+        public bool IsDeleted { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string LastUpdatedBy { get; set; }

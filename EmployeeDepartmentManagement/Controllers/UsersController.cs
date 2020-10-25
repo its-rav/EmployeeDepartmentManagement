@@ -28,6 +28,12 @@ namespace EmployeeDepartmentManagement.Controllers
             _context = context;
         }
 
+        #region POST users/authenticate
+        //POST api/Users/authenticate
+        /// <summary>
+        /// Authenticate user
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("authenticate")]
         [ProducesResponseType(typeof(BaseResponse<dynamic>), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
@@ -52,7 +58,14 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return Ok(result);
         }
+        #endregion
 
+        #region GET users/me
+        //GET api/Users/me
+        /// <summary>
+        /// Get current user info
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("me")]
         [Authorize]
         [ProducesResponseType(typeof(BaseResponse<UserViewModel>), 201)]
@@ -77,6 +90,6 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return Ok(result);
         }
-
+        #endregion
     }
 }

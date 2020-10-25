@@ -25,19 +25,35 @@ namespace EmployeeDepartmentManagement.Controllers
         {
             _departmentService = departmentService;
         }
-
+        #region GET departments
         // GET: api/Departments
+        /// <summary>
+        /// Get departments
+        /// </summary>
+        /// <param name="Q">Search keyword(by department name)</param>
+        /// <param name="Page">Page index</param>
+        /// <param name="Size">Page size</param>
+        /// <returns></returns>
         [HttpGet]
         [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
         [ProducesResponseType(typeof(BaseResponse<List<DepartmentViewModel>>), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartments()
+        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartments([FromQuery] string Q="", int Page = 1, int Size = Constants.DEFAULT_PAGE_SIZE)
         {
             var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
             var roles = IdentityManager.GetRolesFromToken(raw);
 
-            var departments = _departmentService.GetDepartments(roles);
+            List<DepartmentViewModel> departments = null;
+
+            if (Q.Trim().Equals(""))
+            {
+                departments = _departmentService.GetDepartments(Page, Size, roles);
+            }
+            else
+            {
+                departments = _departmentService.SearchDepartmentsByName(Q,Page,Size,roles);
+            }
 
             if (departments == null)
             {
@@ -51,18 +67,37 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return Ok(result);
         }
+        #endregion
 
-        [HttpGet("staff/{staffId}")]
+        #region GET deparments/staff/{id}
+        /// <summary>
+        /// Get departments of a staff by ID
+        /// </summary>
+        /// <param name="id">Staff ID</param>
+        /// <param name="Q">Search keyword (by department name)</param>
+        /// <param name="Page">Page index</param>
+        /// <param name="Size">Page size</param>
+        /// <returns></returns>
+        [HttpGet("staff/{id}")]
         [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
         [ProducesResponseType(typeof(BaseResponse<List<DepartmentViewModel>>), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartmentStaff(Guid staffId)
+        public async Task<ActionResult<BaseResponse<List<DepartmentViewModel>>>> GetDepartmentStaff(Guid id,[FromQuery] string Q = "", int Page = 1, int Size = Constants.DEFAULT_PAGE_SIZE)
         {
             var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
             var roles = IdentityManager.GetRolesFromToken(raw);
 
-            var departments = _departmentService.GetDepartmentsOfStaff(staffId, roles);
+            List<DepartmentViewModel> departments = null;
+
+            if (Q.Trim().Equals(""))
+            {
+                departments = _departmentService.GetDepartmentsOfStaff(id,Page, Size, roles);
+            }
+            else
+            {
+                departments = _departmentService.SearchDepartmentsOfStaffByName(id,Q, Page, Size, roles);
+            }
 
             if (departments == null)
             {
@@ -76,19 +111,26 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return Ok(result);
         }
+        #endregion
 
+        #region GET departments/{id}
+        /// <summary>
+        /// Get a department by ID
+        /// </summary>
+        /// <param name="id">Department ID</param>
+        /// <returns></returns>
         // GET: api/Departments/5
-        [HttpGet("{departmentId}")]
+        [HttpGet("{id}")]
         [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
         [ProducesResponseType(typeof(BaseResponse<DepartmentViewModel>), 200)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<ActionResult<BaseResponse<DepartmentViewModel>>> GetDepartment(string departmentId)
+        public async Task<ActionResult<BaseResponse<DepartmentViewModel>>> GetDepartment(string id)
         {
             var raw = Request.Headers.FirstOrDefault(x => x.Key.Equals("Authorization")).Value;
             var roles = IdentityManager.GetRolesFromToken(raw);
 
-            var department = _departmentService.GetDepartmentById(departmentId, roles);
+            var department = _departmentService.GetDepartmentById(id, roles);
 
             if (department == null)
             {
@@ -102,7 +144,14 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return Ok(result);
         }
+        #endregion
 
+        #region PUT departments/{id}
+        /// <summary>
+        /// Update a departments by ID
+        /// </summary>
+        /// <param name="id">Department ID</param>
+        /// <returns></returns>
         // PUT: api/Departments/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -134,7 +183,13 @@ namespace EmployeeDepartmentManagement.Controllers
                     throw;
             }
         }
+        #endregion
 
+        #region POST departments
+        /// <summary>
+        /// Create a department
+        /// </summary>
+        /// <returns></returns>
         // POST: api/Departments
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -169,8 +224,15 @@ namespace EmployeeDepartmentManagement.Controllers
                     throw;
             }
         }
+        #endregion
 
+        #region DELETE departments/{id}
         // DELETE: api/Departments/5
+        /// <summary>
+        /// Remove a department by ID
+        /// </summary>
+        /// <param name="id">Department ID</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = (Constants.ROLE_ADMIN_NAME + "," + Constants.ROLE_MOD_NAME))]
         [ProducesResponseType(typeof(BaseResponse<string>), 200)]
@@ -197,5 +259,6 @@ namespace EmployeeDepartmentManagement.Controllers
 
             return result;
         }
+        #endregion
     }
 }

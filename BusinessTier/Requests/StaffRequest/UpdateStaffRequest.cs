@@ -14,7 +14,7 @@ namespace BusinessTier.Requests.StaffRequest
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Photo { get; set; }
-        public int RoleId { get; set; }
-        public bool IsDeleted { get; set; }
+        public int? RoleId { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }

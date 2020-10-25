@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EmployeeDepartmentManagement</name>
+    </assembly>
+    <members>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.GetDepartments(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get departments
+            </summary>
+            <param name="Q">Search keyword(by department name)</param>
+            <param name="Page">Page index</param>
+            <param name="Size">Page size</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.GetDepartmentStaff(System.Guid,System.String,System.Int32,System.Int32)">
+            <summary>
+            Get departments of a staff by ID
+            </summary>
+            <param name="id">Staff ID</param>
+            <param name="Q">Search keyword (by department name)</param>
+            <param name="Page">Page index</param>
+            <param name="Size">Page size</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.GetDepartment(System.String)">
+            <summary>
+            Get a department by ID
+            </summary>
+            <param name="id">Department ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.PutDepartment(System.String,BusinessTier.Requests.DepartmentRequest.UpdateDepartmentRequest)">
+            <summary>
+            Update a departments by ID
+            </summary>
+            <param name="id">Department ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.PostAccount(BusinessTier.Requests.DepartmentRequest.CreateDepartmentRequest)">
+            <summary>
+            Create a department
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.DepartmentsController.DeleteDepartmentStaff(System.String)">
+            <summary>
+            Remove a department by ID
+            </summary>
+            <param name="id">Department ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.GetStaffs(System.String,System.Int32,System.Int32)">
+            <summary>
+            Get staffs
+            </summary>
+            <param name="Q" in="query">Search keyword(by staff username)</param>
+            <param name="Page" in="query">Page index</param>
+            <param name="Size" in="query">Page size</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.GetStaffsOfDepartment(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Get staffs in a department by department ID
+            </summary>
+            <param name="id">Deparment ID</param>
+            <param name="Q" in="query">Search keyword(by staff username)</param>
+            <param name="Page" in="query">Page index</param>
+            <param name="Size" in="query">Page size</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.GetDepartmentStaff(System.Guid)">
+            <summary>
+            Get a staff by ID
+            </summary>
+            <param name="id">Staff ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.PutDepartmentStaff(System.Guid,BusinessTier.Requests.StaffRequest.UpdateStaffRequest)">
+            <summary>
+            Update staff by ID
+            </summary>
+            <param name="id">Staff ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.PostAccount(BusinessTier.Requests.StaffRequest.CreateStaffRequest)">
+            <summary>
+            Create a staff
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.StaffsController.DeleteDepartmentStaff(System.Guid)">
+            <summary>
+            Remove staff by ID
+            </summary>
+            <param name="id">Staff ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.UsersController.AuthenticateAccount(BusinessTier.Requests.UserRequest.AuthenticateRequest)">
+            <summary>
+            Authenticate user
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:EmployeeDepartmentManagement.Controllers.UsersController.GetUser">
+            <summary>
+            Get current user info
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -16,8 +16,10 @@ namespace BusinessTier.Services
 {
     public interface IStaffService
     {
-        List<StaffViewModel> GetStaffs(IEnumerable<string> roles);
-        List<StaffViewModel> GetStaffsOfDepartment(string departmentId, IEnumerable<string> roles);
+        List<StaffViewModel> GetStaffs(int page,int size,IEnumerable<string> roles);
+        List<StaffViewModel> SearchStaffsByUsername(string query,int page, int size, IEnumerable<string> roles);
+        List<StaffViewModel> GetStaffsOfDepartment(string departmentId, int page, int size, IEnumerable<string> roles); 
+        List<StaffViewModel> SearchStaffsOfDepartmentByUserName(string departmentId, string query, int page, int size, IEnumerable<string> roles);
         StaffViewModel GetStaffById(Guid staffId, IEnumerable<string> roles);
         StaffViewModel CreateStaff(CreateStaffRequest request, string createdBy, IEnumerable<string> roles);
         StaffViewModel UpdateStaff(Guid id, UpdateStaffRequest request, string updatedBy, IEnumerable<string> roles);
@@ -32,11 +34,11 @@ namespace BusinessTier.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper.ConfigurationProvider.CreateMapper();
         }
-        public List<StaffViewModel> GetStaffs(IEnumerable<string> roles = null)
+        public List<StaffViewModel> GetStaffs(int page=1, int size=Constants.DEFAULT_PAGE_SIZE,IEnumerable<string> roles = null)
         {
             if (roles.Count() == 0 || roles == null) return null;
 
-            var staffs = new List<Account>();
+            IQueryable<Account> staffs = null;
 
             //if staff request => get all
             if (roles.Contains(Constants.ROLE_ADMIN_NAME))
@@ -44,8 +46,7 @@ namespace BusinessTier.Services
                 staffs = _unitOfWork.Repository<Account>()
                 .FindAllByProperty(x =>true)
                 .Include(x => x.Role)
-                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList().IgnoreSecondAccounts();
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
             }
             //if mod request => get only staffs
             else if (roles.Contains(Constants.ROLE_MOD_NAME))
@@ -53,26 +54,59 @@ namespace BusinessTier.Services
                 staffs = _unitOfWork.Repository<Account>()
                 .FindAllByProperty(x => x.Role.Id.Equals(Constants.ROLE_STAFF_ID))
                 .Include(x => x.Role)
-                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList().IgnoreSecondAccounts();
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
             }
 
-            return _mapper.Map<List<StaffViewModel>>(staffs);
+            if (staffs == null) return null;
+
+            var result = staffs.ToPaginatedList<Account>(page, size).IgnoreSecondAccounts();
+
+            return _mapper.Map<List<StaffViewModel>>(result);
         }
-        
-        public List<StaffViewModel> GetStaffsOfDepartment(string departmentId, IEnumerable<string> roles = null)
+        public List<StaffViewModel> SearchStaffsByUsername(string query="", int page=1, int size=Constants.DEFAULT_PAGE_SIZE, IEnumerable<string> roles=null)
+        {
+            if (size > Constants.MAX_PAGE_SIZE)
+                throw new Exception(Constants.ERR_MAX_PAGE_SIZE);
+
+            if (roles.Count() == 0 || roles == null) return null;
+
+            var staffs = (IQueryable<Account>)null;
+
+            //if staff request => get all
+            if (roles.Contains(Constants.ROLE_ADMIN_NAME))
+            {
+                staffs = _unitOfWork.Repository<Account>()
+                .FindAllByProperty(x => x.Username.Contains(query.Trim()))
+                .Include(x => x.Role)
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
+            }
+            //if mod request => get only staffs
+            else if (roles.Contains(Constants.ROLE_MOD_NAME))
+            {
+                staffs = _unitOfWork.Repository<Account>()
+                .FindAllByProperty(x => x.Username.Contains(query.Trim()) && x.Role.Id.Equals(Constants.ROLE_STAFF_ID))
+                .Include(x => x.Role)
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
+            }
+
+            if (staffs == null) return null;
+
+            var result = staffs.ToPaginatedList<Account>(page, size).IgnoreSecondAccounts();
+
+            return _mapper.Map<List<StaffViewModel>>(result);
+        }
+        public List<StaffViewModel> GetStaffsOfDepartment(string departmentId, int page = 1, int size = Constants.DEFAULT_PAGE_SIZE, IEnumerable<string> roles = null)
         {
             if (roles.Count() == 0 || roles == null) return null;
 
-            var staffs = new List<Account>();
+            IQueryable<Account> staffs = null;
 
             if (roles.Contains(Constants.ROLE_ADMIN_NAME))
             {
                 staffs = _unitOfWork.Repository<Account>()
                  .Get(x => x.DepartmentStaff.Select(x => x.DepartmentId).Contains(departmentId))
                  .Include(x => x.Role)
-                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                 .ToList().IgnoreSecondAccounts();
+                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
             }
             //if mod request => get only staffs
             else if (roles.Contains(Constants.ROLE_MOD_NAME))
@@ -81,11 +115,47 @@ namespace BusinessTier.Services
                 .Get(x => x.DepartmentStaff.Select(x => x.DepartmentId).Contains(departmentId)
                                     && x.Role.Id.Equals(Constants.ROLE_STAFF_ID) ) 
                 .Include(x => x.Role)
-                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department)
-                .ToList().IgnoreSecondAccounts();
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
             }
 
-            return _mapper.Map<List<StaffViewModel>>(staffs);
+            if (staffs == null) return null;
+
+            var result = staffs.ToPaginatedList<Account>(page, size).IgnoreSecondAccounts();
+
+            return _mapper.Map<List<StaffViewModel>>(result);
+        }
+        public List<StaffViewModel> SearchStaffsOfDepartmentByUserName(string departmentId,string query="", int page=1, int size = Constants.DEFAULT_PAGE_SIZE, IEnumerable<string> roles = null)
+        {
+            if (size > Constants.MAX_PAGE_SIZE)
+                throw new Exception(Constants.ERR_MAX_PAGE_SIZE);
+
+            if (roles.Count() == 0 || roles == null) return null;
+
+            IQueryable<Account> staffs = null;
+
+            if (roles.Contains(Constants.ROLE_ADMIN_NAME))
+            {
+                staffs = _unitOfWork.Repository<Account>()
+                 .Get(x => x.DepartmentStaff.Select(x => x.DepartmentId).Contains(departmentId) && x.Username.Contains(query.Trim()))
+                 .Include(x => x.Role)
+                 .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
+            }
+            //if mod request => get only staffs
+            else if (roles.Contains(Constants.ROLE_MOD_NAME))
+            {
+                staffs = _unitOfWork.Repository<Account>()
+                .Get(x => x.DepartmentStaff.Select(x => x.DepartmentId).Contains(departmentId)
+                                    && x.Role.Id.Equals(Constants.ROLE_STAFF_ID)
+                                    && x.Username.Contains(query.Trim()))
+                .Include(x => x.Role)
+                .Include(x => x.DepartmentStaff).ThenInclude(x => x.Department);
+            }
+
+            if (staffs == null) return null;
+
+            var result = staffs.ToPaginatedList<Account>(page, size).IgnoreSecondAccounts();
+
+            return _mapper.Map<List<StaffViewModel>>(result);
         }
         public StaffViewModel GetStaffById(Guid staffId, IEnumerable<string> roles = null)
         {
@@ -113,7 +183,6 @@ namespace BusinessTier.Services
 
             return _mapper.Map<StaffViewModel>(staff);
         }
-
         public StaffViewModel UpdateStaff(Guid id, UpdateStaffRequest request, string updatedBy, IEnumerable<string> roles = null)
         {
             if (roles.Count() == 0 || roles == null) return null;
@@ -127,7 +196,10 @@ namespace BusinessTier.Services
                 throw new Exception(Constants.ERR_EMPTY_EMAIL);
             if (request.FullName.IsEmpty())
                 throw new Exception(Constants.ERR_EMPTY_FNAME);
-
+            if (request.IsDeleted==null)
+                throw new Exception(Constants.ERR_EMPTY_DELFLAG);
+            if (request.PhoneNumber.Length > Constants.CONSTRAINT_PHONENUM_MAXLEN)
+                throw new Exception(Constants.ERR_PHONENUM_MAXLEN);
 
             var repo = _unitOfWork.Repository<Account>();
 
@@ -189,7 +261,6 @@ namespace BusinessTier.Services
 
             return _mapper.Map<StaffViewModel>(staff);
         }
-
         public StaffViewModel CreateStaff(CreateStaffRequest request, string createdBy, IEnumerable<string> roles = null)
         {
             if (roles.Count() == 0 || roles == null) return null;
@@ -197,14 +268,17 @@ namespace BusinessTier.Services
             if (roles.Contains(Constants.ROLE_MOD_NAME) && !request.RoleId.Equals(Constants.ROLE_STAFF_ID))
                 return null;
 
-            if (request.Password.IsEmpty() || request.PasswordConfirmation.IsEmpty())
-                throw new Exception(Constants.ERR_EMPTY_PWD);
+            if (!request.Password.IsEmpty() && request.PasswordConfirmation.IsEmpty())
+                throw new Exception(Constants.ERR_EMPTY_PWD_CONFIR);
+            else if (!request.Password.IsEmpty() && !request.Password.Equals(request.PasswordConfirmation))
+                throw new Exception(Constants.ERR_PWD_NOTMATCH);
+
             if (request.Email.IsEmpty())
                 throw new Exception(Constants.ERR_EMPTY_EMAIL);
             if (request.FullName.IsEmpty())
                 throw new Exception(Constants.ERR_EMPTY_FNAME);
-            if (!request.Password.Equals(request.PasswordConfirmation))
-                throw new Exception(Constants.ERR_PWD_NOTMATCH);
+            if (request.PhoneNumber.Length > Constants.CONSTRAINT_PHONENUM_MAXLEN)
+                throw new Exception(Constants.ERR_PHONENUM_MAXLEN);
 
 
             var repo = _unitOfWork.Repository<Account>();
@@ -244,8 +318,7 @@ namespace BusinessTier.Services
 
             return _mapper.Map<StaffViewModel>(creatingStaff);
         }
-
-        public string DeleteStaff(Guid id, string updater, IEnumerable<string> roles)
+        public string DeleteStaff(Guid id, string updater, IEnumerable<string> roles=null)
         {
             if (roles.Count() == 0 || roles == null) return null;
 
@@ -273,6 +346,7 @@ namespace BusinessTier.Services
 
             return null;
         }
+
     }
 
     static class StaffServiceExtensions

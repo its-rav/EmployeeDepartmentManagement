@@ -15,7 +15,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -76,6 +78,9 @@ namespace EmployeeDepartmentManagement.App_Start
                 //c.OperationFilter<RemoveVersionParameterFilter>();
                 //c.DocumentFilter<ReplaceVersionWithExactValueInPathFilter>();
                 c.EnableAnnotations();
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
             services.AddSwaggerGenNewtonsoftSupport();
             services.TryAddEnumerable(ServiceDescriptor.Transient<IApiDescriptionProvider, SnakeCaseQueryParametersApiDescriptionProvider>());

@@ -9,5 +9,6 @@ namespace BusinessTier.Requests.DepartmentRequest
         public string DepartmentName { get; set; }
         public string Hotline { get; set; }
         public string RoomNumber { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }

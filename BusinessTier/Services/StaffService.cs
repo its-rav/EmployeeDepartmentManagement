@@ -227,9 +227,12 @@ namespace BusinessTier.Services
                 props.ForAll(x =>
                 {
                     if (x.GetValue(updatingStaff) != null 
-                    && ! new[] { nameof(Account.UpdatedAt), nameof(Account.CreatedAt) }.Contains(x.Name))
+                    && ! new[] { nameof(Account.UpdatedAt), nameof(Account.RoleId), nameof(Account.Id), nameof(Account.CreatedAt) }.Contains(x.Name))
                         x.SetValue(staff, x.GetValue(updatingStaff));
                 });
+
+                if (!updatingStaff.RoleId.Equals(0))
+                    staff.RoleId = updatingStaff.RoleId;
 
                 if(!request.Password.IsEmpty())
                     staff.PasswordHash = IdentityManager.HashPassword(request.Password);

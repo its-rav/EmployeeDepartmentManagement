@@ -1,0 +1,31 @@
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure for Students Starter(d8d7d9a8-5c1b-4367-ab07-4b2f95e03807)'
+        dockerComposeFile: '**/docker-compose.yml'
+        additionalDockerComposeFiles: '**/docker-compose.override.yml'
+        action: 'Build services'
+        nopIfNoDockerComposeFile: true
+        requireAdditionalDockerComposeFiles: true

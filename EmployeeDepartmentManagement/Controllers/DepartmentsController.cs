@@ -62,7 +62,9 @@ namespace EmployeeDepartmentManagement.Controllers
 
             var result = new BaseResponse<List<DepartmentViewModel>>()
             {
-                Data = departments
+                Data = departments,
+                Page = Page,
+                Size = Size
             };
 
             return Ok(result);
@@ -106,7 +108,9 @@ namespace EmployeeDepartmentManagement.Controllers
 
             var result = new BaseResponse<List<DepartmentViewModel>>()
             {
-                Data = departments
+                Data = departments,
+                Page = Page,
+                Size = Size
             };
 
             return Ok(result);

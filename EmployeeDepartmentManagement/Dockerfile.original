@@ -8,8 +8,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj", "EmployeeDepartmentManagement/"]
-COPY ["DataTier/DataTier.csproj", "DataTier/"]
-COPY ["BusinessTier/BusinessTier.csproj", "BusinessTier/"]
 RUN dotnet restore "EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj"
 COPY . .
 WORKDIR "/src/EmployeeDepartmentManagement"

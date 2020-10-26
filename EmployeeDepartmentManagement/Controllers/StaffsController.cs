@@ -108,7 +108,9 @@ namespace EmployeeDepartmentManagement.Controllers
 
             var result = new BaseResponse<List<StaffViewModel>>()
             {
-                Data = staffs
+                Data = staffs,
+                Page=Page,
+                Size=Size
             };
 
             return Ok(result);

@@ -23,9 +23,12 @@ stages:
     - task: DockerCompose@0
       inputs:
         containerregistrytype: 'Azure Container Registry'
-        azureSubscription: 'Azure for Students Starter(d8d7d9a8-5c1b-4367-ab07-4b2f95e03807)'
+        azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
         dockerComposeFile: '**/docker-compose.yml'
-        additionalDockerComposeFiles: '**/docker-compose.override.yml'
         action: 'Build services'
-        nopIfNoDockerComposeFile: true
-        requireAdditionalDockerComposeFiles: true
+    - task: DockerCompose@0
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
+        dockerComposeFile: '**/docker-compose.yml'
+        action: 'Push services'

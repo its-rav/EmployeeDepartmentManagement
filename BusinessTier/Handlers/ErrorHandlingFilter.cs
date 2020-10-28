@@ -26,7 +26,7 @@ namespace BusinessTier.Handlers
             };
             context.ExceptionHandled = true;
 #else
-            context.Result = new ObjectResult(new ErrorResponse((int)HttpStatusCode.InternalServerError, "Opps, something went wrong!"))
+            context.Result = new ObjectResult(new ErrorResponse(HttpStatusCode.InternalServerError.ToString(), "Opps, something went wrong!"))
             {
                 StatusCode = (int)HttpStatusCode.InternalServerError,
             };

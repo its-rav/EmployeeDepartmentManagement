@@ -40,8 +40,8 @@ stages:
         action: 'Push services'
         nopIfNoDockerComposeFile: true
         requireAdditionalDockerComposeFiles: true
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'docker-compose'
-        publishLocation: 'Container'
+        targetPath: '$(Pipeline.Workspace)'
+        artifact: 'docker-compose'
+        publishLocation: 'pipeline'

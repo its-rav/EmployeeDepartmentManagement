@@ -25,10 +25,12 @@ stages:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
         dockerComposeFile: '**/docker-compose.yml'
+        additionalDockerComposeFiles: '**/docker-compose.override.yml'
         action: 'Build services'
     - task: DockerCompose@0
       inputs:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
         dockerComposeFile: '**/docker-compose.yml'
+        additionalDockerComposeFiles: '**/docker-compose.override.yml'
         action: 'Push services'

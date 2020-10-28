@@ -24,22 +24,20 @@ stages:
       inputs:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
-        azureContainerRegistry: '{"loginServer":"prc301.azurecr.io", "id" : "/subscriptions/06dcc3e1-fca7-4757-a22d-37e528e2e8c8/resourceGroups/homeworkprc/providers/Microsoft.ContainerRegistry/registries/prc301"}'
+        azureContainerRegistry: '{"loginServer":"prcedmhomework.azurecr.io", "id" : "/subscriptions/06dcc3e1-fca7-4757-a22d-37e528e2e8c8/resourceGroups/homeworkprc/providers/Microsoft.ContainerRegistry/registries/prcedmhomework"}'
         dockerComposeFile: '**/docker-compose.yml'
         additionalDockerComposeFiles: 'docker-compose.override.yml'
-        action: 'Run a Docker Compose command'
-        dockerComposeCommand: 'build'
+        action: 'Build services'
         nopIfNoDockerComposeFile: true
         requireAdditionalDockerComposeFiles: true
     - task: DockerCompose@0
       inputs:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
-        azureContainerRegistry: '{"loginServer":"prc301.azurecr.io", "id" : "/subscriptions/06dcc3e1-fca7-4757-a22d-37e528e2e8c8/resourceGroups/homeworkprc/providers/Microsoft.ContainerRegistry/registries/prc301"}'
+        azureContainerRegistry: '{"loginServer":"prcedmhomework.azurecr.io", "id" : "/subscriptions/06dcc3e1-fca7-4757-a22d-37e528e2e8c8/resourceGroups/homeworkprc/providers/Microsoft.ContainerRegistry/registries/prcedmhomework"}'
         dockerComposeFile: '**/docker-compose.yml'
         additionalDockerComposeFiles: 'docker-compose.override.yml'
-        action: 'Run a Docker Compose command'
-        dockerComposeCommand: 'push'
+        action: 'Push services'
         nopIfNoDockerComposeFile: true
         requireAdditionalDockerComposeFiles: true
     - task: PublishBuildArtifacts@1

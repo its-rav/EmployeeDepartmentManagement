@@ -13,7 +13,7 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build and push image
   jobs:  
   - job: Build
     displayName: Build
@@ -24,21 +24,15 @@ stages:
       inputs:
         containerregistrytype: 'Azure Container Registry'
         azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
+        azureContainerRegistry: '{"loginServer":"prc301.azurecr.io", "id" : "/subscriptions/06dcc3e1-fca7-4757-a22d-37e528e2e8c8/resourceGroups/homeworkprc/providers/Microsoft.ContainerRegistry/registries/prc301"}'
         dockerComposeFile: '**/docker-compose.yml'
         additionalDockerComposeFiles: 'docker-compose.override.yml'
-        action: 'Build services'
-- stage: Push
-  displayName: Push image
-  jobs:  
-  - job: Push
-    displayName: Push
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: DockerCompose@0
+        action: 'Run a Docker Compose command'
+        dockerComposeCommand: 'buildAndPush'
+        nopIfNoDockerComposeFile: true
+        requireAdditionalDockerComposeFiles: true
+    - task: PublishBuildArtifacts@1
       inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscription: 'Azure subscription 1(06dcc3e1-fca7-4757-a22d-37e528e2e8c8)'
-        dockerComposeFile: '**/docker-compose.yml'
-        additionalDockerComposeFiles: 'docker-compose.override.yml'
-        action: 'Push services'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'docker-compose'
+        publishLocation: 'Container'

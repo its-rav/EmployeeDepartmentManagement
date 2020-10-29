@@ -21,10 +21,10 @@ jobs:
         dotnet-version: '3.1.102'
 
     - name: Build with dotnet
-      run: dotnet build --configuration Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement
+      run: dotnet build --configuration Release -o ${{env.DOTNET_ROOT}}/debug  ./EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj
 
     - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/edm ./EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -32,4 +32,4 @@ jobs:
         app-name: 'edm-prc'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_98a8474cb20a4708803771a6046f2388 }}
-        package: ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement 
+        package: ${{env.DOTNET_ROOT}}/edm 

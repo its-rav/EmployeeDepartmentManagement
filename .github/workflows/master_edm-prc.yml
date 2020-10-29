@@ -21,10 +21,10 @@ jobs:
         dotnet-version: '3.1.102'
 
     - name: Build with dotnet
-      run: dotnet build --configuration Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj
+      run: dotnet build --configuration Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement
 
     - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement/EmployeeDepartmentManagement.csproj
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/EmployeeDepartmentManagement
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2

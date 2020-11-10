@@ -209,7 +209,8 @@ namespace BusinessTier.Services
             try
             {
                 staff = repo.Get(x => x.Id.Equals(id))
-                    .Include(x=>x.Role).FirstOrDefault();
+                    .Include(x=>x.Role)
+                    .Include(x=>x.DepartmentStaff).FirstOrDefault();
 
                 //not found
                 if (staff == null)
@@ -227,14 +228,27 @@ namespace BusinessTier.Services
                 props.ForAll(x =>
                 {
                     if (x.GetValue(updatingStaff) != null 
-                    && ! new[] { nameof(Account.UpdatedAt), nameof(Account.RoleId), nameof(Account.Id), nameof(Account.CreatedAt) }.Contains(x.Name))
+                    && ! new[] { nameof(Account.UpdatedAt), nameof(Account.DepartmentStaff), nameof(Account.RoleId), nameof(Account.Id), nameof(Account.CreatedAt) }.Contains(x.Name))
                         x.SetValue(staff, x.GetValue(updatingStaff));
                 });
 
                 if (!updatingStaff.RoleId.Equals(0))
                     staff.RoleId = updatingStaff.RoleId;
+                //_unitOfWork.Repository<DepartmentStaff>().Rem
+                request.Departments.ForAll(department => {
+                        staff.DepartmentStaff = new List<DepartmentStaff>();
 
-                if(!request.Password.IsEmpty())
+                    staff.DepartmentStaff.Add(new DepartmentStaff()
+                    {
+                        AccountId = staff.Id,
+                        DepartmentId =department,
+                        UpdatedBy = updatedBy,
+                        CreatedBy = updatedBy
+                    });
+                });
+                
+
+                if (!request.Password.IsEmpty())
                     staff.PasswordHash = IdentityManager.HashPassword(request.Password);
                 staff.UpdatedBy = updatedBy;
                 staff.UpdatedAt = DateTime.Now;

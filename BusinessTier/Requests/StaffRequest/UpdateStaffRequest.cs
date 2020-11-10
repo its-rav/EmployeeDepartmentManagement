@@ -15,6 +15,9 @@ namespace BusinessTier.Requests.StaffRequest
         public string Address { get; set; }
         public string Photo { get; set; }
         public int? RoleId { get; set; }
+
+        public ICollection<string> Departments { get; set; }
+
         public bool? IsDeleted { get; set; }
     }
 }
